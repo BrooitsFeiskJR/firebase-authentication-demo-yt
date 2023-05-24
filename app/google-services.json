@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "750902515940",
+    "project_id": "authentication-sample-yt-e9f96",
+    "storage_bucket": "authentication-sample-yt-e9f96.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750902515940:android:e38c4116e2490f964fb4f1",
+        "android_client_info": {
+          "package_name": "dev.tontech.authentication_firebase_sample_yt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "750902515940-8h4b1aug9qu9egggv0nf0p2qt1ueualv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.tontech.authentication_firebase_sample_yt",
+            "certificate_hash": "61a12234b41e5dd17223f2200389af0c4b8f4df4"
+          }
+        },
+        {
+          "client_id": "750902515940-o71pa59o8565se19l0miun7kl88a9fuu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu1jIxgW8R7S6dZiE8CbtXL8kCiOnsXDM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "750902515940-o71pa59o8565se19l0miun7kl88a9fuu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
