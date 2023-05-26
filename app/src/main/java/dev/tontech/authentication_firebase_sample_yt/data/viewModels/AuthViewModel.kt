@@ -1,4 +1,4 @@
-package dev.tontech.authentication_firebase_sample_yt.data
+package dev.tontech.authentication_firebase_sample_yt.data.viewModels
 
 import android.app.Application
 import android.content.Intent
@@ -13,22 +13,24 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dev.tontech.authentication_firebase_sample_yt.R
 import dev.tontech.authentication_firebase_sample_yt.data.enums.LoginUiState
-import kotlinx.coroutines.Dispatchers
+import dev.tontech.authentication_firebase_sample_yt.data.repositories.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val auth: FirebaseAuth, application: Application) : AndroidViewModel(application) {
-    private val _user = MutableStateFlow<FirebaseUser?>(null)
-    val user: StateFlow<FirebaseUser?>
-        get() = _user.asStateFlow()
+class AuthViewModel(
+    private val auth: FirebaseAuth,
+    private val application: Application,
+    private val repository: FirebaseRepository)
+    : AndroidViewModel(application) {
+
+
 
     private val _loginUiState = MutableStateFlow(LoginUiState.LOADING)
     val loginUiState: StateFlow<LoginUiState>
@@ -44,6 +46,7 @@ class LoginViewModel(private val auth: FirebaseAuth, application: Application) :
     .setFilterByAuthorizedAccounts(false)
     .setServerClientId(application.getString(R.string.default_web_client_id))
     .build()).setAutoSelectEnabled(true).build()
+
 
 
     fun getSignResultFromIntent(intent: Intent?) {
@@ -67,20 +70,13 @@ class LoginViewModel(private val auth: FirebaseAuth, application: Application) :
         }
     }
 
-    fun signInWithEmailAndPassword(email: String, password: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                if(task.isSuccessful) {
-                    _loginUiState.value = LoginUiState.SUCCESS
-                    _user.value = auth.currentUser
-                } else {
-                    _loginUiState.value = LoginUiState.ERROR
-                    Log.d(TAG, "ERROR FROM: signInWithEmailAndPassword")
-                }
-            }
+
+     fun signInWithEmailAndPassword(email: String, password: String) {
+        viewModelScope.launch {
+            repository.loginWithEmailAndPassword(email, password)
+            _loginUiState.value = LoginUiState.SUCCESS
         }
     }
-
 
     companion object {
         private var TAG = "EmailAndPassword"
@@ -95,9 +91,10 @@ class LoginViewModel(private val auth: FirebaseAuth, application: Application) :
                 val application = checkNotNull(extras[APPLICATION_KEY])
                 val firebaseAuth = Firebase.auth
 
-                return LoginViewModel(
+                return AuthViewModel(
                     auth = firebaseAuth,
-                    application = application
+                    application = application,
+                    repository = FirebaseRepository(firebaseAuth)
                 ) as T
             }
         }
