@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_marginStart="@dimen/side_margin"
     android:layout_marginEnd="@dimen/side_margin"
-    tools:context=".LoginActivity">
+    tools:context=".ui.fragments.LoginFragment">
 
 
     <TextView
@@ -68,7 +68,7 @@
 
             />
     </com.google.android.material.textfield.TextInputLayout>
-    
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"

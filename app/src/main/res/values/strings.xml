@@ -51,4 +51,6 @@
     <string name="btn_create_account_text">Register</string>
     <string name="et_confirm_password">Confirm your password</string>
     <string name="btn_register_with_google">Login with Google</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

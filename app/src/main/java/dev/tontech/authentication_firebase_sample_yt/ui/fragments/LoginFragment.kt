@@ -1,28 +1,33 @@
-package dev.tontech.authentication_firebase_sample_yt
+package dev.tontech.authentication_firebase_sample_yt.ui.fragments
 
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import dev.tontech.authentication_firebase_sample_yt.data.LoginViewModel
+import dev.tontech.authentication_firebase_sample_yt.R
 import dev.tontech.authentication_firebase_sample_yt.data.enums.LoginUiState
-import dev.tontech.authentication_firebase_sample_yt.databinding.ActivityLoginBinding
+import dev.tontech.authentication_firebase_sample_yt.data.viewModels.AuthViewModel
+import dev.tontech.authentication_firebase_sample_yt.databinding.FragmentLoginBinding
 import kotlinx.coroutines.launch
 
-class LoginActivity : AppCompatActivity() {
+class LoginFragment : Fragment() {
     private val reqOneTap = 2
 
-    private val viewModel: LoginViewModel by viewModels { LoginViewModel.Factory }
+    private val viewModel: AuthViewModel by viewModels { AuthViewModel.Factory }
 
     private lateinit var auth: FirebaseAuth
-    private var binding: ActivityLoginBinding? = null
+    private var binding: FragmentLoginBinding? = null
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -34,10 +39,19 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentLoginBinding.inflate(inflater, container, false)
+        return binding?.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding?.root)
+        val navController = view.findNavController()
 
         auth = Firebase.auth
 
@@ -45,7 +59,7 @@ class LoginActivity : AppCompatActivity() {
             viewModel.loginUiState.collect {state ->
                 when(state) {
                     LoginUiState.SUCCESS -> {
-                        Log.d(TAG, "Success")
+                        navController.navigate(R.id.action_loginFragment_to_homeFragment)
                     }
                     LoginUiState.LOADING -> {
                         Log.d(TAG, "Loading")
@@ -64,14 +78,9 @@ class LoginActivity : AppCompatActivity() {
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 lifecycleScope.launch {
                     viewModel.signInWithEmailAndPassword(email, password)
-                    viewModel.user.collect {user ->
-                        if (user != null) {
-                            Log.d(TAG, user.displayName.toString())
-                        }
-                    }
                 }
             } else {
-                Toast.makeText(this@LoginActivity, "Por favor, preencha os campos.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Por favor, preencha os campos.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -80,8 +89,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding?.tvCreateAccount?.setOnClickListener {
-            val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
-            startActivity(intent)
+           navController.navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
 
@@ -92,7 +100,7 @@ class LoginActivity : AppCompatActivity() {
             } catch (e: IntentSender.SendIntentException) {
                 Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
             }
-        }.addOnFailureListener(this) { e ->
+        }.addOnFailureListener(requireActivity()) { e ->
             e.localizedMessage?.let { e.localizedMessage?.let { it1 -> Log.d(TAG, it1) } }
         }
     }
