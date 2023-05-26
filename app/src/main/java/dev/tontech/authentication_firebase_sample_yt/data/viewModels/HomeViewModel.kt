@@ -30,7 +30,8 @@ class HomeViewModel(private val repository: FirebaseRepository): ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = object: ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                return HomeViewModel(FirebaseRepository(Firebase.auth)) as T
+                val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
+                return HomeViewModel(FirebaseRepository(Firebase.auth, application)) as T
             }
         }
     }

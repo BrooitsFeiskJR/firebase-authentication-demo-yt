@@ -94,7 +94,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun showAuthGoogle() {
-        viewModel.oneTapClient.beginSignIn(viewModel.signInRequest).addOnSuccessListener { result ->
+        viewModel.signInWithGoogle().addOnSuccessListener { result ->
             try {
                 startIntentSenderForResult(result.pendingIntent.intentSender, reqOneTap, null, 0, 0, 0, null)
             } catch (e: IntentSender.SendIntentException) {
