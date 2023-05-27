@@ -34,7 +34,7 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.user.observe(viewLifecycleOwner) { user ->
                     if (user != null) {
-                        binding?.tvUsername?.text = user.email.toString()
+                        binding?.tvUsername?.text = user.user.email.toString()
                     }
                 }
             }

@@ -6,24 +6,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import dev.tontech.authentication_firebase_sample_yt.data.model.User
 import dev.tontech.authentication_firebase_sample_yt.data.repositories.FirebaseRepository
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repository: FirebaseRepository): ViewModel() {
-
     init {
         viewModelScope.launch {
-            repository.user.collect { user ->
-                _user.value = user
+            repository.user.collect { u ->
+                _user.value = User(user = u!!, isSignIn = true)
             }
         }
     }
 
-    private val _user = MutableLiveData<FirebaseUser>()
-    val user: LiveData<FirebaseUser?>
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User>
         get() = _user
 
     @Suppress("UNCHECKED_CAST")
