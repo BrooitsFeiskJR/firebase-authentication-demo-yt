@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import dev.tontech.authentication_firebase_sample_yt.data.viewModels.HomeViewModel
 import dev.tontech.authentication_firebase_sample_yt.databinding.FragmentHomeBinding
 import kotlinx.coroutines.launch
@@ -29,9 +31,11 @@ class HomeFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            viewModel.user.observe(viewLifecycleOwner) { user ->
-                if (user != null) {
-                    binding?.tvUsername?.text = user.email.toString()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.user.observe(viewLifecycleOwner) { user ->
+                    if (user != null) {
+                        binding?.tvUsername?.text = user.email.toString()
+                    }
                 }
             }
         }

@@ -10,11 +10,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import dev.tontech.authentication_firebase_sample_yt.R
 import dev.tontech.authentication_firebase_sample_yt.data.enums.LoginUiState
 import dev.tontech.authentication_firebase_sample_yt.data.viewModels.AuthViewModel
@@ -26,7 +25,6 @@ class LoginFragment : Fragment() {
 
     private val viewModel: AuthViewModel by viewModels { AuthViewModel.Factory }
 
-    private lateinit var auth: FirebaseAuth
     private var binding: FragmentLoginBinding? = null
 
     @Deprecated("Deprecated in Java")
@@ -53,19 +51,19 @@ class LoginFragment : Fragment() {
         super.onCreate(savedInstanceState)
         val navController = view.findNavController()
 
-        auth = Firebase.auth
-
-        lifecycleScope.launch {
-            viewModel.loginUiState.collect {state ->
-                when(state) {
-                    LoginUiState.SUCCESS -> {
-                        navController.navigate(R.id.action_loginFragment_to_homeFragment)
-                    }
-                    LoginUiState.LOADING -> {
-                        Log.d(TAG, "Loading")
-                    }
-                    LoginUiState.ERROR -> {
-                        Log.d(TAG, "Error")
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.loginUiState.collect {state ->
+                    when(state) {
+                        LoginUiState.SUCCESS -> {
+                            navController.navigate(R.id.action_loginFragment_to_homeFragment)
+                        }
+                        LoginUiState.LOADING -> {
+                            Log.d(TAG, "Loading")
+                        }
+                        LoginUiState.ERROR -> {
+                            Log.d(TAG, "Error")
+                        }
                     }
                 }
             }
@@ -94,14 +92,18 @@ class LoginFragment : Fragment() {
     }
 
     private fun showAuthGoogle() {
-        viewModel.signInWithGoogle().addOnSuccessListener { result ->
-            try {
-                startIntentSenderForResult(result.pendingIntent.intentSender, reqOneTap, null, 0, 0, 0, null)
-            } catch (e: IntentSender.SendIntentException) {
-                Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.signInWithGoogle().addOnSuccessListener { result ->
+                    try {
+                        startIntentSenderForResult(result.pendingIntent.intentSender, reqOneTap, null, 0, 0, 0, null)
+                    } catch (e: IntentSender.SendIntentException) {
+                        Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
+                    }
+                }.addOnFailureListener(requireActivity()) { e ->
+                    e.localizedMessage?.let { e.localizedMessage?.let { it1 -> Log.d(TAG, it1) } }
+                }
             }
-        }.addOnFailureListener(requireActivity()) { e ->
-            e.localizedMessage?.let { e.localizedMessage?.let { it1 -> Log.d(TAG, it1) } }
         }
     }
 

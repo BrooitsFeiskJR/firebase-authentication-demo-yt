@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.auth.api.identity.BeginSignInResult
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -31,20 +33,38 @@ class AuthViewModel(
 
     fun getSignResultFromIntent(intent: Intent?) {
         viewModelScope.launch {
-            val idToken = repository.getSignResultFromIntent(intent)
-            when {
-                idToken != null -> {
-                    Log.d(TAG, "Got ID token.")
-                    repository.signInWithTokenCredential(idToken, null).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            _loginUiState.value = LoginUiState.SUCCESS
-                        } else {
-                            _loginUiState.value = LoginUiState.ERROR
-                            Log.d(TAG, "ERROR FROM: getSignResultFromIntent")
+            try {
+                val idToken = repository.getSignResultFromIntent(intent)
+                when {
+                    idToken != null -> {
+                        Log.d(TAG, "Got ID token.")
+                        repository.signInWithTokenCredential(idToken, null).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                _loginUiState.value = LoginUiState.SUCCESS
+                            } else {
+                                _loginUiState.value = LoginUiState.ERROR
+                                Log.d(TAG, "ERROR FROM: getSignResultFromIntent")
+                            }
                         }
+                    }  else -> {
+                    Log.d(TAG, "No id token!")
+                }
+                }
+            } catch (e: ApiException) {
+                when (e.statusCode) {
+                    CommonStatusCodes.CANCELED -> {
+                        Log.d(TAG, "One-tap dialog was closed")
+                        _loginUiState.value = LoginUiState.ERROR
                     }
-                }  else -> {
-                Log.d(TAG, "No id token!")
+                    CommonStatusCodes.NETWORK_ERROR -> {
+                        Log.d(TAG, "One-tap encountered a network error.")
+                        _loginUiState.value = LoginUiState.ERROR
+                    }
+                    else -> {
+                        Log.d(TAG, "Couldn't get credential from result." +
+                                " (${e.localizedMessage})")
+                        _loginUiState.value = LoginUiState.ERROR
+                    }
                 }
             }
         }
@@ -58,6 +78,18 @@ class AuthViewModel(
         viewModelScope.launch {
             repository.loginWithEmailAndPassword(email, password)
             _loginUiState.value = LoginUiState.SUCCESS
+        }
+    }
+
+    fun createUserWithEmailAndPassword(email: String, password: String) {
+        viewModelScope.launch {
+            repository.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                if (task.isSuccessful){
+                    _loginUiState.value = LoginUiState.SUCCESS
+                } else {
+                    _loginUiState.value = LoginUiState.ERROR
+                }
+            }
         }
     }
 

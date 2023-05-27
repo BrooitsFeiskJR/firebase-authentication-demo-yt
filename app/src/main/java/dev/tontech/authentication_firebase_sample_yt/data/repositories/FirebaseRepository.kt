@@ -22,6 +22,10 @@ class FirebaseRepository(private val auth: FirebaseAuth, context: Context) {
     val user: StateFlow<FirebaseUser?>
         get() = _user.asStateFlow()
 
+    init {
+        _user.value = auth.currentUser
+    }
+
     private val oneTapClient: SignInClient = Identity.getSignInClient(context)
 
     private val signInRequest: BeginSignInRequest = BeginSignInRequest.builder()
@@ -44,9 +48,6 @@ class FirebaseRepository(private val auth: FirebaseAuth, context: Context) {
     fun beginSignInWithGoogle(): Task<BeginSignInResult> {
         return oneTapClient.beginSignIn(signInRequest)
     }
-    init {
-        _user.value = auth.currentUser
-    }
 
     suspend fun loginWithEmailAndPassword(email: String, password: String) {
         try {
@@ -56,8 +57,8 @@ class FirebaseRepository(private val auth: FirebaseAuth, context: Context) {
         }
     }
 
-    suspend fun registerWithEmailAndPassword(email: String, password: String) {
-        auth.createUserWithEmailAndPassword(email, password).await()
+    fun createUserWithEmailAndPassword(email: String, password: String): Task<AuthResult> {
+        return auth.createUserWithEmailAndPassword(email, password)
     }
 
 }
