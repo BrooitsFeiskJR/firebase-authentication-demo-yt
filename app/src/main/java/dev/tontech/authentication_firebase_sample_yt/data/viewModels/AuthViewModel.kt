@@ -16,7 +16,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dev.tontech.authentication_firebase_sample_yt.data.enums.LoginUiState
-import dev.tontech.authentication_firebase_sample_yt.data.repositories.FirebaseRepository
+import dev.tontech.authentication_firebase_sample_yt.data.repositories.FirebaseAuthenticationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val application: Application,
-    private val repository: FirebaseRepository)
+    private val repository: FirebaseAuthenticationRepository)
     : AndroidViewModel(application) {
 
     private val _loginUiState = MutableStateFlow(LoginUiState.LOADING)
@@ -46,9 +46,7 @@ class AuthViewModel(
                                 Log.d(TAG, "ERROR FROM: getSignResultFromIntent")
                             }
                         }
-                    }  else -> {
-                    Log.d(TAG, "No id token!")
-                }
+                    }  else -> Log.d(TAG, "No id token!")
                 }
             } catch (e: ApiException) {
                 when (e.statusCode) {
@@ -108,7 +106,7 @@ class AuthViewModel(
 
                 return AuthViewModel(
                     application = application,
-                    repository = FirebaseRepository(firebaseAuth, application)
+                    repository = FirebaseAuthenticationRepository(auth = firebaseAuth, context = application)
                 ) as T
             }
         }

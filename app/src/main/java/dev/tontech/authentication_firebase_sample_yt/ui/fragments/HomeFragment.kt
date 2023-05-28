@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dev.tontech.authentication_firebase_sample_yt.data.model.Employee
 import dev.tontech.authentication_firebase_sample_yt.data.viewModels.HomeViewModel
 import dev.tontech.authentication_firebase_sample_yt.databinding.FragmentHomeBinding
 import kotlinx.coroutines.launch
@@ -32,9 +33,21 @@ class HomeFragment : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.user.observe(viewLifecycleOwner) { user ->
-                    if (user != null) {
-                        binding?.tvUsername?.text = user.user.email.toString()
+                viewModel.writeMessageDatabase(Employee(
+                    id = 1,
+                    name = "Rafaela Pavan",
+                    cpf = "10193471981",
+                    birthdayDate = "21/02/2004",
+                    email = "luizantonio0125@gmail.com"
+                ))
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.employee.observe(viewLifecycleOwner) { emp ->
+                    if (emp != null) {
+                        binding?.tvUsername?.text = emp.cpf
                     }
                 }
             }
